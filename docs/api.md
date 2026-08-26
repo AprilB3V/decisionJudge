@@ -374,8 +374,12 @@ type DecisionJudgeExportV1 = {
   schemaVersion: number;
   decisions: PortableDecisionV1[];
   snapshots: SnapshotView[];
+  /** Optional for backwards-compatible v1 readers. */
+  presets?: PresetView[];
 };
 ```
+
+`presets` 只包含可复用的方案、评价维度、权重和来源模板信息，不包含本次决策的评分、快照或结果。旧版导出文件没有该字段时按空数组处理。
 
 - **媒体类型**：`application/json; charset=utf-8`。
 - **建议文件名**：`decisionjudge-backup-YYYYMMDD-HHmmss.json`。

@@ -1,7 +1,7 @@
 export type UUID = string;
 
 export type DecisionStatus = "draft" | "decided";
-export type TemplateId = "study-or-work" | "job-change" | "city-choice" | "major-purchase";
+export type TemplateId = "blank" | "study-or-work" | "job-change" | "city-choice" | "major-purchase";
 
 export type Option = {
   id: UUID;
@@ -72,6 +72,18 @@ export type Decision = {
   scores: Score[];
   sunkCosts: SunkCost[];
   advanced: AdvancedSettings;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Preset = {
+  id: UUID;
+  name: string;
+  description: string;
+  sourceTemplateId: TemplateId;
+  sourceTemplateName: string;
+  criteria: Array<Omit<Criterion, "id">>;
+  options: Array<Omit<Option, "id">>;
   createdAt: string;
   updatedAt: string;
 };

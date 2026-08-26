@@ -24,6 +24,8 @@ erDiagram
     OPTION ||--o{ SCENARIO : models
     DECISION ||--o{ SUNK_COST : records
     DECISION ||--o{ SNAPSHOT : freezes
+    PRESET ||--o{ OPTION : defines
+    PRESET ||--o{ CRITERION : defines
     SNAPSHOT ||--|| EVALUATION_RESULT : stores
     APP_META ||--o{ DIAGNOSTIC_EVENT : configures
 
@@ -88,6 +90,16 @@ erDiagram
       uuid chosenOptionId
       int sourceRevision
       datetime createdAt
+    }
+    PRESET {
+      uuid id PK
+      string name
+      string description
+      string sourceTemplateId
+      json options
+      json criteria
+      datetime createdAt
+      datetime updatedAt
     }
     EVALUATION_RESULT {
       string calculationVersion
@@ -231,4 +243,4 @@ erDiagram
 
 ## 7. 种子数据
 
-四个内置模板作为版本化应用资源发布，不存入 IndexedDB。从模板创建决策时，将模板 ID、版本和必要内容复制到 Decision，以保证模板升级不修改历史决策。
+五个内置模板作为版本化应用资源发布，不存入 IndexedDB。从模板创建决策时，将模板 ID、版本和必要内容复制到 Decision，以保证模板升级不修改历史决策。用户预设存储在独立的 `presets` object store，仅保留方案、评价维度和权重等结构数据；使用预设创建决策时重新生成选项、维度和评分单元的 ID。

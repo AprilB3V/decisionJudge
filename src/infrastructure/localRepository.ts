@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { Decision } from "../domain/types";
+import type { Decision, Preset } from "../domain/types";
 
 export type SnapshotRecord = {
   id: string;
@@ -16,12 +16,14 @@ export type SnapshotRecord = {
 class DecisionDatabase extends Dexie {
   decisions!: Table<Decision, string>;
   snapshots!: Table<SnapshotRecord, string>;
+  presets!: Table<Preset, string>;
 
   constructor() {
     super("decisionjudge-local");
     this.version(1).stores({
       decisions: "id, updatedAt, status, templateId",
       snapshots: "id, decisionId, createdAt",
+      presets: "id, updatedAt, sourceTemplateId",
     });
   }
 }
@@ -61,9 +63,23 @@ export async function listSnapshots(decisionId?: string) {
   return decisionId ? db.snapshots.where("decisionId").equals(decisionId).reverse().sortBy("createdAt") : db.snapshots.orderBy("createdAt").reverse().toArray();
 }
 
-export async function replaceAll(decisions: Decision[], snapshots: SnapshotRecord[]) {
-  await db.transaction("rw", db.decisions, db.snapshots, async () => {
+export async function replaceAll(decisions: Decision[], snapshots: SnapshotRecord[], presets: Preset[] = []) {
+  await db.transaction("rw", db.decisions, db.snapshots, db.presets, async () => {
     await db.decisions.bulkPut(decisions);
     await db.snapshots.bulkPut(snapshots);
+    if (presets.length > 0) await db.presets.bulkPut(presets);
   });
+}
+
+export async function listPresets() {
+  return db.presets.orderBy("updatedAt").reverse().toArray();
+}
+
+export async function savePreset(preset: Preset) {
+  await db.presets.put(preset);
+  return preset;
+}
+
+export async function deletePreset(id: string) {
+  await db.presets.delete(id);
 }

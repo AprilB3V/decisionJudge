@@ -22,7 +22,8 @@ DecisionJudge MVP 是一款无账号、无云端依赖的本地单用户 Web 应
 ### 2.1 MVP 范围
 
 - 响应式单页 Web 应用。
-- 四个内置决策模板。
+- 五个内置决策模板（含可自行搭建的空白模板）。
+- 用户可将方案、评价维度和权重保存为本地预设，并从预设快速创建新决策。
 - 决策编辑、自动保存、排名、解释和快照。
 - 本地持久化、导入、导出和删除。
 - 基础加权模型与按模块启用的高级计算。
@@ -40,6 +41,7 @@ DecisionJudge MVP 是一款无账号、无云端依赖的本地单用户 Web 应
 | 需求能力 | 主要组件 | 数据 | 契约 | 测试 |
 | --- | --- | --- | --- | --- |
 | 模板创建决策 | Template Catalog, Decision Service | Decision | `createDecision` | 模板集成测试 |
+| 预设复用 | Preset Service, Local Repository | Preset | `createPreset`, `createDecisionFromPreset` | 结构复制与 ID 重建测试 |
 | 硬约束排除 | Domain Engine | Constraint, Option | `evaluateDecision` | 领域单元测试 |
 | 加权评分与排名 | Domain Engine | Criterion, Factor, Score | `evaluateDecision` | 精确结果单元测试 |
 | 机会成本 | Explanation Engine | EvaluationResult | `evaluateDecision` | 排名与次优方案测试 |
@@ -108,6 +110,8 @@ flowchart LR
 - **依赖**：无运行时外部依赖。
 - **失败行为**：未知模板不能创建决策；旧决策使用创建时已复制的模板数据，不被后续模板更新暗中改写。
 
+用户预设存储在独立的 `presets` object store，仅保存可复用的方案、评价维度和权重，不保存评分或结果；使用预设创建决策时重新生成内部 ID。
+
 ## 6. 运行时、部署与数据流
 
 ### 6.1 技术基线
@@ -119,6 +123,8 @@ flowchart LR
 - Vitest 用于领域和应用测试，Testing Library 用于组件测试，Playwright 用于关键流程。
 
 ### 6.2 编辑与自动保存
+
+编辑器采用五步渐进式向导：明确问题、列出方案、设置权重、逐项评分、查看结果。步骤状态属于 UI 暂态，不持久化到 Decision；所有业务输入仍写入同一 Decision 聚合，并沿用统一的自动保存和 revision 冲突控制。步骤切换不得触发数据重置，局部校验只控制“继续”按钮，不阻止用户通过步骤导航返回已访问内容。
 
 ```mermaid
 sequenceDiagram

@@ -11,6 +11,14 @@ export type Template = {
 
 export const templates: Template[] = [
   {
+    id: "blank",
+    name: "空白模板",
+    description: "从一个空白画布开始，自己定义方案和评价维度。",
+    concepts: ["自定义", "权衡取舍"],
+    criteria: [],
+    starterOptions: [],
+  },
+  {
     id: "study-or-work",
     name: "升学还是就业",
     description: "比较继续学习与立即进入职场的长期取舍。",
