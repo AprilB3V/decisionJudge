@@ -1,0 +1,30 @@
+{
+  "delete": {
+    "before": {
+      "decisions": 1,
+      "snapshots": 1
+    },
+    "afterCancel": {
+      "decisions": 1,
+      "snapshots": 1
+    },
+    "after": {
+      "decisions": 0,
+      "snapshots": 0
+    },
+    "confirmationDialogs": 2,
+    "undoButtonCount": 0
+  },
+  "conflict": {
+    "stillInEditor": true,
+    "draftRetained": "另一页尚未保存的输入",
+    "recoveryButtons": [
+      "重试保存",
+      "导出当前草稿"
+    ]
+  },
+  "anchors": {
+    "customScaleVisible": false,
+    "genericScaleVisible": true
+  }
+}

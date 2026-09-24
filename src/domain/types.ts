@@ -1,3 +1,5 @@
+import type { DecisionWorkflow } from "./workflow";
+
 export type UUID = string;
 
 export type DecisionStatus = "draft" | "decided";
@@ -31,6 +33,10 @@ export type Score = {
   criterionId: UUID;
   value: number | null;
   evidence: string;
+  evidenceSource?: string;
+  evidenceDate?: string;
+  evidenceKind?: "fact" | "assumption" | "estimate";
+  evidenceConfidence?: "low" | "medium" | "high";
 };
 
 export type SunkCost = {
@@ -72,6 +78,7 @@ export type Decision = {
   scores: Score[];
   sunkCosts: SunkCost[];
   advanced: AdvancedSettings;
+  workflow?: DecisionWorkflow;
   createdAt: string;
   updatedAt: string;
 };
@@ -95,6 +102,11 @@ export type Contribution = {
   score: number;
 };
 
+export type RelativeContribution = Contribution & {
+  alternativeScore: number;
+  weightedDifference: number;
+};
+
 export type EvaluationRow = {
   rank: number;
   optionId: UUID;
@@ -104,6 +116,7 @@ export type EvaluationRow = {
   netAdvantageOverNextBest?: number;
   strengths: Contribution[];
   weaknesses: Contribution[];
+  relativeContributions?: RelativeContribution[];
 };
 
 export type EvaluationResult = {
@@ -116,6 +129,9 @@ export type EvaluationResult = {
   decisiveCriteria: string[];
   activeAdvancedModules: string[];
   notices: Array<{ concept: "opportunity" | "sunk" | "constraint" | "advanced"; title: string; body: string }>;
+  stabilityDescription?: string;
+  tiedFirstOptionIds?: UUID[];
+  pendingConstraintOptionIds?: UUID[];
 };
 
 export const emptyAdvanced: AdvancedSettings = {

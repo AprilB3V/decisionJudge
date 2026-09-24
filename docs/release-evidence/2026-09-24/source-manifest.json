@@ -1,0 +1,167 @@
+{
+  "version": "0.3.0",
+  "scope": "working-tree source and lockfile; excludes documentation and dist",
+  "baseCommit": "483b5ce",
+  "files": [
+    {
+      "path": "package.json",
+      "sha256": "a7cce0028f7f158b661fa955df4964f94bc8ef290e8056189b3bb85ddbd0a97c"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "6a8852422ba01f89b83cadb3c69f7dcba6db9050f91d36bdd642387d990bafec"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "712cd16eed77d43b634b9f3cd5cc4fb29e91fe303c9ea72a1c0774b3803a12ee"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "7d5dcd394ce82b9d6ca2c4a653e533f785d03718f5af021cda3eedd590e578a0"
+    },
+    {
+      "path": "tsconfig.node.json",
+      "sha256": "f49ef24e097144fecc29f677361cb45b2019e1bcc0dba54bab083760f7df6200"
+    },
+    {
+      "path": "index.html",
+      "sha256": "d79a9e76afaf9e91c59c4177a41f683a2e5e7a8e98015316de0d04e6db859555"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "d14587aa6075d8b1fa2fbecbabb87060935b6f87d050a933e1b0e68ea284887f"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "17f60e4aa86d6234d6e1fe1223d4f09a3e94180c96d50ace12c204623cd8ff1f"
+    },
+    {
+      "path": "src/infrastructure/localRepository.ts",
+      "sha256": "e3ee8f965650000fd31c9ff96c1411be6ca2f4f90daf848fc7dff7be96cb902c"
+    },
+    {
+      "path": "src/infrastructure/localRepository.test.ts",
+      "sha256": "fee1168a75e052a9ee787068494d0f36b2a3ea5a989e4a08cdc66f05eb6628cc"
+    },
+    {
+      "path": "src/infrastructure/assistantSettings.ts",
+      "sha256": "f2a27db8541697373e793c7fb9b21f11368cfb2962f5234612b6d6f54ad628e6"
+    },
+    {
+      "path": "src/infrastructure/assistantClient.ts",
+      "sha256": "e94fde55564680d48052a6c56f3f7500af66462e389bc25321a58048028a19b6"
+    },
+    {
+      "path": "src/infrastructure/assistantClient.test.ts",
+      "sha256": "b866e37ab08f6053ee60999c4c45163b6d64dcdfeab9d6bc42d7f59c5346867e"
+    },
+    {
+      "path": "src/domain/workflow.ts",
+      "sha256": "be800d24ba73e16e0811596f297b36c9fd4368faaec6815da5c1f2ade12d3822"
+    },
+    {
+      "path": "src/domain/workflow.test.ts",
+      "sha256": "3f86b4d1423c5c5a1ee4e0c7d7247501a64ca238d0a5e7b815c2d33664342350"
+    },
+    {
+      "path": "src/domain/types.ts",
+      "sha256": "5ea225281ad4fab63e1240d8a9a585bcdfd1c3ad21623f94c691b8194299f5cc"
+    },
+    {
+      "path": "src/domain/templates.ts",
+      "sha256": "dfeb325c1296539e3fe357bdd17a8f645984cca21bd4a7c6b591ab52589ba7a4"
+    },
+    {
+      "path": "src/domain/evaluation.ts",
+      "sha256": "bb814cc5349900158a9e324e2b521c9d11c0a9cd9f18b202d1741e3335f20052"
+    },
+    {
+      "path": "src/domain/evaluation.test.ts",
+      "sha256": "5c89a132bc7828bda1190d63ae4c2d6b6477c7f5bf1e2c97ec3aa29ffc2257da"
+    },
+    {
+      "path": "src/domain/assistant.ts",
+      "sha256": "cabd5dcfb8900cb5622427b3d1652259a78a7e40f699c717b74a07281777bbcf"
+    },
+    {
+      "path": "src/domain/assistant.test.ts",
+      "sha256": "254eb97ce836d6f66e6efb9787cb43fab15b5d11e31822031c9facee1765aece"
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "af8b9328d03f97f04376650d83af61a77607330b15321b54fa1ba8e31c774a02"
+    },
+    {
+      "path": "src/components/assistant.css",
+      "sha256": "917524a792049ec1866b095ee1ecded3358c1e2b65a535c94b8a59f40b0c0b02"
+    },
+    {
+      "path": "src/components/DecisionSteps.test.ts",
+      "sha256": "2418b729c68a2316c3cf8acaaf737341e421c0907a5253e54f9b2333adb8dbe9"
+    },
+    {
+      "path": "src/components/DecisionAssistant.tsx",
+      "sha256": "0f3f3c80424a0907d6079c6671027ef01cbd082ba2fd27c52f802193628beb45"
+    },
+    {
+      "path": "src/components/DecisionWorkspace.tsx",
+      "sha256": "16b6a3819e2dc34b209fd84caacda5da5aa557cb8da03ce6bc579945815fe34f"
+    },
+    {
+      "path": "src/components/decision-steps.css",
+      "sha256": "acdc5165395a16a8cc03791c35b9a7841d673a0d2326b477c1d113dae33c0d18"
+    },
+    {
+      "path": "src/components/DecisionSteps.tsx",
+      "sha256": "18b8075eddb963b67ad0543eda9631c86c33d536c5b22c3621f625fd05693dad"
+    },
+    {
+      "path": "src/components/Editor.tsx",
+      "sha256": "fab3650ad61c1309f834dc689ed10de276632c74cb4d1f0574e6b84b7eced2cb"
+    },
+    {
+      "path": "src/components/Home.tsx",
+      "sha256": "733ab7f57c538960dde9eb9c1ade0dedc8acc0f6b84a6647cfc78ea53a818a73"
+    },
+    {
+      "path": "src/components/workspace.css",
+      "sha256": "3dfdd3169107d46f9a8379fcab6d7a9dca76735969e69b4ddb1501fdd10a1f13"
+    },
+    {
+      "path": "src/components/SimpleComparison.tsx",
+      "sha256": "c9c3132d3886ef8bed414fa6f7b2a520b019f43b2ad3aa376b0a1bf65736ea7a"
+    },
+    {
+      "path": "src/components/simple-comparison.css",
+      "sha256": "8665a4f675a64acb7cb3871d291aff3aa122471dd7ec1c3c1c5b011cbb634047"
+    },
+    {
+      "path": "src/application/decisionSession.ts",
+      "sha256": "a8822281e81d97841e973611c11c1c7f84eee45bd5981aea79a09cf4a3cbcf57"
+    },
+    {
+      "path": "src/application/decisionSession.test.ts",
+      "sha256": "1227943272d42c0675dc40f0975edf88e3236d2fdf092a79c693fdbeb80e79ec"
+    },
+    {
+      "path": "src/application/decisionService.ts",
+      "sha256": "8736c3a838f4c2b5fc43dd2fdb93e4386dcae99ac547cfd68da0188e612a968a"
+    },
+    {
+      "path": "src/application/decisionService.test.ts",
+      "sha256": "c287394d273d98b923f62e429ea1de71fd779e9df620942ffe9ff232f22ee951"
+    },
+    {
+      "path": "src/application/backup.ts",
+      "sha256": "5a3d04c1fd06a4877af9272524a945c836efc03aaa10156ed25dfe339c1fa277"
+    },
+    {
+      "path": "src/application/backup.test.ts",
+      "sha256": "b05dd619e32c74a9a351ab5cb758bcf4a8a7ce0c3fc819a45f885ec2c32e07e6"
+    }
+  ]
+}

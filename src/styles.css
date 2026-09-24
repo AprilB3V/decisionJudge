@@ -181,3 +181,33 @@ h1 em { color: #ca6c49; font-style: normal; }
   .preset-heading > span { display: block; margin-top: 5px; }
   .preset-dialog { padding: 25px 20px; }
 }
+
+/* Shared workspaces, save feedback and historical records. */
+.editor-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
+.editor-name { min-width: 0; }
+.editor-title-small { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; padding-bottom: 16px; border-bottom: 1px solid #d9e5e8; }
+.workspace-tabs button { padding: 12px 18px; border: 1px solid #d9e5e8; background: white; color: #567682; font-size: 13px; }
+.workspace-tabs button.active { color: white; background: #173b4f; border-color: #173b4f; }
+.save-error-box, .app-notice { margin-bottom: 22px; padding: 16px 20px; border: 1px solid #b9d7cb; background: #f3faf7; color: #346955; font-size: 13px; line-height: 1.7; }
+.save-error-box, .app-notice.error { background: #fff5ee; border-color: #e6b79f; color: #974d35; }
+.app-notice { margin: 0; }
+.app-notice button { margin-left: 20px; }
+.save-error-box p { margin: 0 0 10px; }
+.save-error-box > div { display: flex; flex-wrap: wrap; gap: 10px; }
+.save-error-box button, .app-notice button { border: 1px solid currentColor; padding: 6px 10px; color: inherit; background: white; }
+.snapshot-history { margin-top: 34px; color: #567682; }
+.snapshot-history h2 { color: #193448; font-size: 21px; }
+.snapshot-history > p { font-size: 13px; line-height: 1.7; }
+.snapshot-history details { margin-top: 12px; padding: 20px; border: 1px solid #d9e5e8; background: white; font-size: 13px; overflow-wrap: anywhere; }
+.snapshot-history summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; cursor: pointer; color: #193448; }
+.snapshot-evidence { line-height: 1.8; }
+@media (max-width: 620px) {
+  .editor-shell .topbar { flex-wrap: wrap; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
+  .editor-shell .topbar .save-status { width: 100%; text-align: right; }
+  .editor-shell .topbar .header-action { margin-left: auto; }
+  .editor-shell .topbar .topbar-spacer { display: none; }
+  .editor-title-small { max-width: 43vw; }
+  .workspace-tabs { gap: 6px; }
+  .workspace-tabs button { flex: 1; padding: 10px 5px; font-size: 12px; white-space: nowrap; }
+}

@@ -1,7 +1,103 @@
 # DecisionJudge 应用契约
 
-> 状态：待评审  
-> 版本：0.1  
+## 0.3 问答助手契约（2026-09-24）
+
+- `chatEndpoint(baseUrl): string` 接受 HTTPS 基础地址或完整 `/chat/completions` 地址；本机回环可使用 HTTP。拒绝 URL 内嵌凭据、查询参数和片段。
+- `requestAssistant(settings, apiKey, decision, messages, signal?)` 发出非流式 `POST`，请求 `{model,messages,stream:false}`。密钥仅在 Authorization header；不带 cookie、不跟随重定向，60 秒超时，可取消。HTTP 错误只显示状态与通用恢复建议，不回显响应体。
+- `assistantContext(decision)` 仅投影当前问题、日期、方案、维度及其备注/权重、底线；排除 ID、评分证据、执行历史、预测、复盘和快照。
+- `parseAssistantReply(content)` 接受 `{message,proposal:null|DesignProposal}` 或纯文本提问；结构化草稿用 Zod 检查规模、名称唯一性、有限非负权重与完整性，未知字段不写入决策。分数不在助手 DTO 中。
+- `proposalChange(proposal)` 重建 ID、归一化权重、创建空评分及未知约束。UI 需先展示预览、确认替换，并验证比较内容指纹未改变，然后调用 session 更新。
+- `loadAssistantSettings/saveAssistantSettings` 只持久化地址、模型、预设 ID 和系统提示词；密钥由内存单独持有。对话离开编辑器后清除，不在备份中。
+
+普通/专业模式复用 `advancedUiExpanded`；新备份 `appVersion=0.3.0`，格式和 schema 仍为 1。完整响应 DTO 见 [设计文档](./assistant-design.md)。真实供应商连通需要用户自行配置可用地址、模型及密钥。
+
+> 当前实现：0.2 工作区版本，2026-09-22。以下“0.2 实际契约”描述已实现代码；后面的 0.1 内容保留为历史目标设计，不能据此调用尚未存在的接口。
+
+## 0.2 实际契约
+
+### 包内服务与状态
+
+应用没有 HTTP API。当前边界是 TypeScript 函数与 `DecisionSession`，以 [decisionService.ts](../src/application/decisionService.ts)、[decisionSession.ts](../src/application/decisionSession.ts)、[workflow.ts](../src/domain/workflow.ts) 为准。同步函数返回实体或抛出 `Error`；异步存储返回 Promise，失败时 reject。历史设计中的 `Result<T>`、统一 `AppErrorCode`、`updateDecision(command)` 和可选择旧引擎的调用格式尚未实现。
+
+| 实际入口 | 返回与行为 |
+| --- | --- |
+| `createDecision(templateId)` | 新建 `Decision`，`revision=1`、`schemaVersion=1`，不写数据库；内置五个模板包含空白模板 |
+| `createDecisionFromPreset(preset)` | 复制方案、维度、锚点和权重，重建内部 ID 与空评分，不复制工作流记录 |
+| `createPreset(decision, name, description?)` | 生成可复用结构；不带评分、证据、工作流或快照 |
+| `applyDecisionChange(decision, change)` | 同步验证工作流交互、清理失效的任务绑定并更新 `updatedAt`；比较内容变化使状态回到 `draft`，旧选择仍保留在快照 |
+| `evaluate(decision)` / `evaluateDecision(decision)` | 返回 `EvaluationResult`；缺少评分、权重不合法等情况以 `ready=false` 与 `errors` 表示 |
+| `updateRevision(decision)` | 生成 `revision+1`、当前计算版本及更新时间，不单独写库 |
+| `createSnapshot(decision, chosenOptionId)` | 生成已验证的快照候选及 `decided` 决策副本；选择必须在当前排名中且所有硬约束均核实可行；持久化由 `saveSnapshot` 完成 |
+
+`DecisionSession` 是编辑器保存协调器。`update(change): boolean` 立即更新有效内存草稿，失败返回 `false` 并保留原输入；`flush(): Promise<void>` 串行排空待保存修改；`confirm(optionId)` 先 flush，再原子保存快照。`getState()` / `subscribe()` 提供 `draft/dirty/saving/confirming/error`。编辑器在 450 ms 空闲后发起 flush，写入期间的新输入保留自己的内容和更新时间；确认期间禁止新修改。保存冲突保留草稿，用户可重试或导出当前草稿。
+
+### 当前数据与工作流
+
+实际 `Decision` 采用平铺 `templateId/templateName`、`advanced` 和 `workflow?`，完整定义见 [types.ts](../src/domain/types.ts)。不是历史 DTO 中的 `template/advancedSettings/draft` 嵌套结构。
+
+```ts
+type DecisionWorkflow = {
+  verificationTasks: VerificationTask[];
+  investments: InvestmentRecord[];
+  investmentBoundary?: { amount: number | null; hours: number | null };
+  actionPlan?: ActionPlan;
+  predictions: Prediction[];
+  reviews: DecisionReview[];
+  reviewDraft?: DecisionReview;
+};
+```
+
+`Decision.workflow` 缺失时界面按空工作流使用；创建新决策会初始化四个空数组。`reviewDraft` 是可编辑、可自动保存及备份的复盘草稿；追加成功后清空草稿，并在实际点击追加时生成 `createdAt`。记录不是独立 object store。
+
+| 工作流入口 | 当前约束 |
+| --- | --- |
+| `validateWorkflow(workflow, asOf?)` | 形状由导入 Zod schema 先验证；此函数检查金额、单位、累计可回收额、真实日期、预测时序与复盘内容，返回 `{ valid, errors }` |
+| `validateWorkflowTransition(previous, next, asOf?)` | UI / 应用交互使用；已封存原始预测字段不可修改或删除，已结算结果不可改写，已追加复盘只能保留原顺序并追加；预测先封存再记录结果 |
+| `sealPrediction(prediction, at?)` | 陈述、概率和事前依据完整，截止日期严格晚于封存的本地日期，且尚无结果；返回新封存对象 |
+| `settlePrediction(prediction, outcome, outcomeEvidence, asOf?)` | 预测已封存，截止的整个本地日已经结束，结果证据非空；结果与依据分开保存，结算后锁定 |
+| `appendReview(workflow, review, at?)` | 返回追加记录后的工作流；复盘至少有一项内容，时间戳取实际追加时刻，不复用草稿起草时间 |
+| `investmentTotals` / `boundaryExceeded` | 人民币与小时各自合计；非负有限数值，累计回收金额不大于实际金额，时间不能回收；达到边界即复评，零边界有效 |
+| `brierScore(predictions, asOf?)` | 仅对合法、已封存且已结算的预测计算平均平方误差；没有有效样本返回 `undefined`，不是总体决策质量分 |
+
+`asOf/at` 默认当前 ISO 时间，可显式传入以测试或读取历史。截止日期为 `YYYY-MM-DD`，判断按本地日；封存和结算存储带时区的时间戳。持久化重放与 UI 的严格逐步交互分开：存储允许保存经过验证的最终聚合，即使失败重试跨日或多个合法交互尚未逐个落盘；已持久化的封存字段、结算结果和复盘历史仍受不可变保护。
+
+### 仓储、版本和快照
+
+实际入口见 [localRepository.ts](../src/infrastructure/localRepository.ts)。
+
+| 入口 | 实际签名与一致性 |
+| --- | --- |
+| 查询 | `listDecisions()`、`getDecision(id)`、`listSnapshots(decisionId?)`、`listPresets()`；无分页或筛选 query DTO |
+| 决策写入 | `saveDecision(decision, expectedRevision?)`；无 expectedRevision 只可新增。更新要求数据库版本等于 expectedRevision，传入新版本等于 expectedRevision+1，在一个读写事务内检查并写入，否则抛出 `revision-conflict` |
+| 快照写入 | `saveSnapshot(snapshot, expectedRevision)`；同一事务更新 Decision 并 `add` Snapshot，ID 冲突或任一步失败全部回滚，历史快照不会被 `put` 覆盖 |
+| 删除 | `deleteDecision(id, deleteSnapshots)`；按参数决定是否删除相关快照，跨 store 原子执行。当前首页删除同时删除快照 |
+| 预设 | `savePreset(preset)` / `deletePreset(id)`；预设独立存储 |
+| 导入写入 | `replaceAll(decisions, snapshots, presets=[])` 名称沿用早期代码，实际是跨三个 store 的 `bulkAdd` 追加事务；不清空或覆盖现有记录 |
+
+新创建快照的 `sourceRevision === decision.revision === result.evaluatedRevision`，三个计算版本字段相互对应。快照创建先在内存中生成新版本及结果，再由仓储原子提交。导入历史快照保留原结果和原计算版本，包括旧版本留下的 revision 差异；不为满足新约束重算历史。
+
+### 导入导出文件
+
+`exportPayload(decisions, snapshots, presets=[])` 返回 JSON 字符串，根对象包含 `format="decisionjudge-export"`、`formatVersion=1`、`exportedAt`、`appVersion="0.2.0"`、`schemaVersion=1` 以及三个数组。`decisions[]` 是实际完整 `Decision`，没有额外的 `draft` 包装。`workflow`、`reviewDraft`、评分证据和快照输入随聚合完整导出。
+
+解析与导入准备由 [backup.ts](../src/application/backup.ts) 实现：
+
+1. `parseBackup(text)` 检查格式、支持的 schema（1 或 2）、形状、ID、引用与工作流语义；缺失 `presets` 按空数组处理，`workflow` 可缺失。历史工作流按记录的 `updatedAt` 检验，未知可选扩展字段保留。JSON/schema/引用错误在写库前拒绝。
+2. `prepareBackupImport(payload, existing)` 返回深拷贝的追加数据。ID 与本地决策、快照、预设或孤立快照来源冲突时生成新 ID，并同步改写 `snapshot.decisionId` 和内嵌 `snapshot.decision.id`；不改变内部评分 ID、封存结果或原记录。
+3. UI 对文件限制 10 MiB，解析和准备后调用 `replaceAll` 原子追加。当前没有 `previewToken`、独立提交令牌或版本迁移注册器。
+
+### 计算边界
+
+当前引擎版本为 `weighted-utility-v2`：1–10 锚点评分乘以非负权重，正权重合计为 1；权重为零的维度不要求评分。结果使用 `rows`、`ready/errors`、相对贡献差、并列首位集合和未知约束提示。不可行方案排除，未知约束方案可暂列比较但不能确认。敏感性分析在合法权重范围内做单维度 ±0.05 扰动并按比例调整其他权重。
+
+因素、自动值换算、情景概率、风险调整、折现和边际分析均尚未参与计算；旧开关只作为兼容字段保留，`activeAdvancedModules` 为空。信息价值提示、投入记录、行动和复盘也不会自动改变比较分。
+
+## 历史目标设计：0.1（保留备查，未全部实现）
+
+以下为 2026-08-23 的目标接口草案。与上面的 0.2 实际契约不一致时，以当前代码和 0.2 说明为准；尤其下文 DTO、类型化错误、token 导入和高级计算公式不代表已交付功能。
+
+> 状态：已实现基线，持续演进
+> 版本：0.2
 > 日期：2026-08-23
 
 ## 1. 契约边界

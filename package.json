@@ -1,7 +1,7 @@
 {
   "name": "decisionjudge",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.3.0",
   "type": "module",
   "license": "MPL-2.0",
   "scripts": {
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "fake-indexeddb": "^6.2.5",
     "typescript": "latest",
     "vitest": "latest",
     "jsdom": "latest"

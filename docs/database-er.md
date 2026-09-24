@@ -1,7 +1,29 @@
 # DecisionJudge 本地数据模型
 
-> 状态：待评审  
-> 版本：0.1  
+## 0.3 配置与内存边界
+
+无 IndexedDB 迁移：`Decision.advancedUiExpanded` 保存普通/专业模式；权重备注复用 `Criterion.description`，评分备注复用 `Score.evidence`，专业信息隐藏时保留。
+
+独立 localStorage 键 `decisionjudge-assistant-settings-v1` 保存 `{baseUrl,model,presetId,systemPrompt}`，通过 schema 丢弃其它字段。API 密钥只存在内存，刷新清除；聊天与待应用草稿属于当前编辑器会话，不进入 Decision、快照或备份。三组提示词为静态预设，可编辑所选提示词并保存其当前版本。
+
+助手应用仅更新当前 Decision 的问题与比较结构，选项/维度重新分配 UUID；旧评分清空，约束需重新核实。既有验证记录保留、清理失效外键，快照/复盘/预测仍保持原有生命周期与保护规则。
+
+> 2026-09-24 实现状态：`Decision.workflow` 聚合已拥有验证任务、投入边界与记录、行动计划、预测、`reviewDraft` 和追加式复盘。保存按 revision 在事务内校验，导入使用批量新增避免覆盖；下文中的 Factor、Scenario 等仍为后续目标模型。
+
+> 2026-09-21 增量：Decision 新增可选 `workflow` 聚合，拥有验证任务、投入边界与记录、行动计划、预测和复盘。Score 新增可选来源、日期、依据类型与信心。缺失字段按空值展示，IndexedDB store 不变；旧快照原样保留。具体规则见 [实施计划](./implementation-plan.md)。下文中的 Factor、Scenario 等仍为后续目标模型。
+
+```mermaid
+erDiagram
+    DECISION ||--o| WORKFLOW : owns
+    WORKFLOW ||--o{ VERIFICATION : contains
+    WORKFLOW ||--o{ INVESTMENT : records
+    WORKFLOW ||--o| ACTION_PLAN : defines
+    WORKFLOW ||--o{ PREDICTION : freezes
+    WORKFLOW ||--o{ REVIEW : appends
+```
+
+> 状态：已实现基线，持续演进
+> 版本：0.2
 > 日期：2026-08-23
 
 ## 1. 存储策略

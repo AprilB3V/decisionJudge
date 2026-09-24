@@ -1,0 +1,22 @@
+import 'fake-indexeddb/auto';
+import { it, expect } from 'vitest';
+import { createDecision, updateRevision } from './decisionService';
+import { emptyWorkflow, sealPrediction, settlePrediction, validateWorkflow } from '../domain/workflow';
+import { db, saveDecision, getDecision } from '../infrastructure/localRepository';
+
+it('release probe: valid final forecast cannot replay a lost intermediate save', async () => {
+  const decision = createDecision('job-change');
+  const prediction = { id: 'release-probe', statement: '是否完成任务', probability: 0.7, outcome: null, dueDate: '2026-09-20', evidence: '', basis: '既有记录', createdAt: '2026-09-01T00:00:00.000Z' };
+  decision.workflow = { ...emptyWorkflow(), predictions: [prediction] };
+  try {
+    await saveDecision(decision);
+    const sealed = sealPrediction(prediction, '2026-09-10T00:00:00.000Z');
+    const settled = settlePrediction(sealed, true, '完成记录', '2026-09-22T00:00:00.000Z');
+    const workflow = { ...emptyWorkflow(), predictions: [settled] };
+    expect(validateWorkflow(workflow).valid).toBe(true);
+    const next = updateRevision({ ...decision, workflow });
+    await expect(saveDecision(next, decision.revision)).rejects.toThrow('请先封存预测');
+    expect((await getDecision(decision.id))!.revision).toBe(decision.revision);
+    console.log('REPRODUCED: valid final state rejected on replay after missing sealed-state save.');
+  } finally { await db.decisions.delete(decision.id); db.close(); }
+});
