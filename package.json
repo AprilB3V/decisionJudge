@@ -2,6 +2,10 @@
   "name": "decisionjudge",
   "private": true,
   "version": "0.3.0",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.18.0 <25"
+  },
   "type": "module",
   "license": "MPL-2.0",
   "scripts": {

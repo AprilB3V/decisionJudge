@@ -12,8 +12,10 @@ DecisionJudge 是一款面向个人重大决策的本地 Web 工具。它把方�
 
 ## 本地运行
 
+使用 Node.js 22.18.0 和 pnpm 11.19.0（版本已在 `package.json` 中声明）。
+
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
@@ -23,6 +25,16 @@ pnpm dev
 pnpm build
 pnpm test
 ```
+
+## GitHub Pages 试用发布
+
+站点地址：[DecisionJudge 在线试用](https://aprilb3v.github.io/decisionJudge/)。
+
+仓库 Settings → Pages 使用 GitHub Actions 作为发布源。推送到 `main` 后，`.github/workflows/pages.yml` 在干净环境安装锁定依赖、运行测试并构建，成功后发布 `dist`。发布路径由 Pages 配置提供，可从 Actions 手动重新运行流程；回滚时恢复已验证的源码提交后重新发布。
+
+本地模拟项目子路径：`pnpm build --base=/decisionJudge/`，随后运行 `pnpm preview` 并访问 `/decisionJudge/`。普通本地构建仍使用根路径。
+
+试用记录保存在当前浏览器；从本地地址切换到线上地址前，请先导出备份，再在新地址导入。模型助手属于实验功能，需自备支持浏览器跨域访问的接口；真实模型连通性尚需按服务商验证。问题可在仓库 Issues 反馈，请不要附上密钥或完整私人决策记录。
 
 ## 使用方式
 
